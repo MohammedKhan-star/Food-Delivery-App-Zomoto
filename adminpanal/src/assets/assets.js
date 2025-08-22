@@ -14,4 +14,4 @@ export const assets ={
     parcel_icon
 }
 
-export const url = 'https://food-delivery-app-zomoto-backend.onrender.com'
+export const url = 'https://food-delivery-app-zomoto-backend3.onrender.com'
