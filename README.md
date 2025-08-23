@@ -1,18 +1,31 @@
-# Getting Started with Create React App
+# TOMATO - Food Ordering Website
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This repository hosts the source code for TOMATO, a dynamic food ordering website built with the MERN Stack. It offers a user-friendly platform for seamless online food ordering.
 
-## Available Scripts
+## Demo 
 
-In the project directory, you can run:
+User Panel: https://food-delivery-app-zomoto-frontend1.onrender.com/
+Admin Panel: https://food-delivery-app-zomoto-admin3.onrender.com/
 
-### `npm start`
+### `Features`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+User Panel
+Admin Panel
+JWT Authentication
+Password Hashing with Bcrypt
+Stripe Payment Integration
+Login/Signup
+Logout
+Add to Cart
+Place Order
+Order Management
+Products Management
+Filter Food Products
+Login/Signup
+Authenticated APIs
+REST APIs
+Role-Based Identification
+Beautiful Alerts
 
 ### `npm test`
 
