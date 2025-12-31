@@ -1,5 +1,13 @@
 import mongoose from "mongoose";
 
-export const connectDB=async ()=>{
-    await mongoose.connect('mongodb+srv://mohammedkhan20019:Ux0Yc6vfWjs6Ivoc@cluster0.noujv2a.mongodb.net/food-del').then(()=>console.log("DB Connected"));
-}
+export const connectDB = async () => {
+  try {
+    const mongoUrl = process.env.MONGO_URL;
+    if (!mongoUrl) throw new Error("MONGO_URL not set");
+
+    await mongoose.connect(mongoUrl);
+    console.log("DB Connected");
+  } catch (err) {
+    console.error("DB Connection Error:", err);
+  }
+};

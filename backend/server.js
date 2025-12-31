@@ -7,6 +7,20 @@ import userRouter from "./routes/userRouter.js";
 import cartRouter from "./routes/cartRouter.js";
 import orderRouter from "./routes/orderRouter.js";
 
+import mongoose from "mongoose";
+import Stripe from "stripe";
+
+// MongoDB
+mongoose.connect(process.env.MONGO_URL)
+  .then(() => console.log("DB Connected"))
+  .catch(err => console.error(err));
+
+// JWT secret
+const jwtSecret = process.env.JWT_SECRET;
+
+// Stripe
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
 // Load environment variables
 dotenv.config();
 
