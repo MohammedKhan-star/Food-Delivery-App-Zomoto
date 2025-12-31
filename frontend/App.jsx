@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
-import Navbar from './components/Navbar/Navbar' 
+import Navbar from './src/components/Navbar/Navbar' 
 import {Route, Routes } from 'react-router-dom'
-import Home from './pages/Home/Home'
-import Footer from './components/Footer/Footer'
-import PlaceOrder from './pages/PlaceOrder/PlaceOrder'
-import LoginPopup from './components/LoginPopup/LoginPopup'
-import Cart from './pages/Cart/Cart'
-import Verify from './pages/Verify/Verify';
-import MyOrders from './pages/MyOrders/MyOrders'
+import Home from './src/pages/Home/Home'
+import Footer from './src/components/Footer/Footer'
+import PlaceOrder from './src/pages/PlaceOrder/PlaceOrder'
+import LoginPopup from './src/components/LoginPopup/LoginPopup'
+import Cart from './src/pages/Cart/Cart'
+import Verify from './src/pages/Verify/Verify';
+import MyOrders from './src/pages/MyOrders/MyOrders'
 
 const App = () => {
   const [showLogin,setShowLogin]=useState(false)
@@ -23,6 +23,7 @@ const App = () => {
         <Route path='/cart' element={<Cart/>}/>
         <Route path="/verify" element={<Verify />} />
         <Route path="/myorders" element={<MyOrders />} />
+        
       </Routes>
       </div>
       <Footer/>

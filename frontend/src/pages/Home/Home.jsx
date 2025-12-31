@@ -14,7 +14,8 @@ const Home = () => {
       <ExploreMenu category={category} setCategory={setCategory} />
     
       <FoodDisplay category={category}  />  
-        
+
+        <h1>Hiis</h1>
       <AppDownload/>
 
 
