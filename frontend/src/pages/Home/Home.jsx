@@ -15,7 +15,7 @@ const Home = () => {
     
       <FoodDisplay category={category}  />  
 
-        <h1>Hiis</h1>
+        
       <AppDownload/>
 
 
