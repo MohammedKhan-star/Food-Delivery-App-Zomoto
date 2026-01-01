@@ -19,7 +19,7 @@ const StoreContextProvider = (props) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const url = "http://localhost:4000";
+  const url = "https://food-delivery-app-zomoto-backend4.onrender.com";
 
   // ✅ Safe add to cart
   const addToCart = async (itemId) => {
@@ -147,14 +147,13 @@ const StoreContextProvider = (props) => {
 
   return (
     <StoreContext.Provider value={contextValue}>
-      {loading ? (
-        <div className="loading">Loading...</div>
-      ) : error ? (
-        <div className="error">{error}</div>
-      ) : (
-        props.children
-      )}
-    </StoreContext.Provider>
+  {error ? (
+    <div className="error">{error}</div>
+  ) : (
+    props.children
+  )}
+</StoreContext.Provider>
+
   );
 };
 
