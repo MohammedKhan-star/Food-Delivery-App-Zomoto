@@ -1,50 +1,40 @@
+import dotenv from "dotenv";
+dotenv.config(); // ✅ MUST be first line
+
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
+import Stripe from "stripe";
+
 import { connectDB } from "./config/db.js";
 import foodRouter from "./routes/foodRouter.js";
 import userRouter from "./routes/userRouter.js";
 import cartRouter from "./routes/cartRouter.js";
 import orderRouter from "./routes/orderRouter.js";
 
-import mongoose from "mongoose";
-import Stripe from "stripe";
-
-// MongoDB
-mongoose.connect(process.env.MONGO_URL)
-  .then(() => console.log("DB Connected"))
-  .catch(err => console.error(err));
-
-// JWT secret
-const jwtSecret = process.env.JWT_SECRET;
-
-// Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-// Load environment variables
-dotenv.config();
-
 // App config
 const app = express();
 const port = process.env.PORT || 4000;
 
+// DB (ONLY ONE CONNECTION)
+connectDB(process.env.MONGO_URI);
+
+// Stripe
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
 // Middleware
 app.use(express.json());
 app.use(cors());
-app.use("/uploads", express.static("uploads")); // Serve uploaded files
+app.use("/uploads", express.static("uploads"));
+app.use("/images", express.static("uploads"));
 
-// Connect DB
-connectDB(process.env.MONGO_URI);
-
-// API endpoints
+// Routes
 app.use("/api/food", foodRouter);
-app.use("/images",express.static('uploads'));
-app.use("/api/user",userRouter)
-app.use('/api/cart',cartRouter)
-app.use("/api/order",orderRouter)
+app.use("/api/user", userRouter);
+app.use("/api/cart", cartRouter);
+app.use("/api/order", orderRouter);
 
 app.get("/", (req, res) => {
-  res.send("API Working");
+  res.send("API Working ✅");
 });
 
 app.listen(port, () => {

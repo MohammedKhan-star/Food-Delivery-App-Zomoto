@@ -1,0 +1,9 @@
+export const food_list = [
+  {
+    _id: "1",
+    name: "Pizza",
+    price: 199,
+    image: "/pizza.png",
+    category: "Italian"
+  }
+];
