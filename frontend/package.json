@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.59.2",
     "@reduxjs/toolkit": "^2.8.2",
     "axios": "^1.13.2",
     "formik": "^2.4.6",
