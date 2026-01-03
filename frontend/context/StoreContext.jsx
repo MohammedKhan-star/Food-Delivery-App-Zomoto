@@ -19,7 +19,7 @@ const StoreContextProvider = (props) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const url = "http://localhost:4000";
+  const url = "https://food-delivery-app-zomoto-ai-6hhv.onrender.com";
 
   // ✅ Safe add to cart
   const addToCart = async (itemId) => {
