@@ -1,5 +1,4 @@
 import dotenv from "dotenv";
-dotenv.config(); // ✅ MUST be first line
 
 import express from "express";
 import cors from "cors";
@@ -10,6 +9,7 @@ import foodRouter from "./routes/foodRouter.js";
 import userRouter from "./routes/userRouter.js";
 import cartRouter from "./routes/cartRouter.js";
 import orderRouter from "./routes/orderRouter.js";
+dotenv.config(); // ✅ MUST be first line
 
 // App config
 const app = express();

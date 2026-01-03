@@ -19,7 +19,7 @@ const StoreContextProvider = (props) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const url = "https://food-delivery-app-zomoto-backend4.onrender.com";
+  const url = "http://localhost:4000";
 
   // ✅ Safe add to cart
   const addToCart = async (itemId) => {
@@ -99,12 +99,14 @@ const StoreContextProvider = (props) => {
   };
 
   // ✅ Load cart with error handling
-  const loadCartData = async (userToken) => {
+
+
+ const loadCartData = async (userToken) => {
     try {
       const response = await axios.post(
         `${url}/api/cart/get`,
         {},
-        { headers: { token: userToken } }
+        { headers: { Authorization: `Bearer ${userToken}` } } // ✅ Correct
       );
       setCartItems(response.data.cartData || {});
     } catch (err) {
@@ -112,6 +114,7 @@ const StoreContextProvider = (props) => {
       setCartItems({});
     }
   };
+
 
   useEffect(() => {
     async function loadData() {

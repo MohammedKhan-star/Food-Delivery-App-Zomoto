@@ -2,35 +2,38 @@ import userModel from "../models/userModel.js";
 import foodModel from "../models/foodModel.js";
 import OpenAI from "openai";
 
+/* =======================
+   OPENAI SETUP
+======================= */
 let openai;
 
-// ✅ Safe OpenAI init
 const getOpenAI = () => {
   if (!openai) {
     if (!process.env.OPENAI_API_KEY) {
       throw new Error("OPENAI_API_KEY is missing");
     }
-    openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+    openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   }
   return openai;
 };
 
-// 🤖 AI CHAT → AUTO ADD TO CART
+/* =======================
+   AI CHAT
+======================= */
 export const chatWithAI = async (req, res) => {
   try {
-    const { message, userId } = req.body;
+    const { message } = req.body;
+    const userId = req.userId;
 
-    // 1️⃣ Fetch menu from DB
+    console.log("AI USER:", userId);
+
     const menu = await foodModel.find({}, "name _id price");
 
-    // 2️⃣ AI prompt
     const prompt = `
 You are a food ordering assistant.
 
-Menu:
-${menu.map(item => `${item.name} (id:${item._id})`).join("\n")}
+Menu items:
+${menu.map(item => item.name).join(", ")}
 
 User message: "${message}"
 
@@ -53,12 +56,11 @@ Otherwise reply:
     const completion = await ai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
+      max_tokens: 150
     });
 
-    const aiText = completion.choices[0].message.content;
-    const aiData = JSON.parse(aiText);
+    const aiData = JSON.parse(completion.choices[0].message.content);
 
-    // 🛒 AUTO ADD TO CART
     if (aiData.intent === "add") {
       const foodItem = menu.find(item =>
         item.name.toLowerCase().includes(aiData.itemName.toLowerCase())
@@ -71,32 +73,37 @@ Otherwise reply:
       const user = await userModel.findById(userId);
       if (!user.cartData) user.cartData = {};
 
-      for (let i = 0; i < aiData.quantity; i++) {
-        user.cartData[foodItem._id] =
-          (user.cartData[foodItem._id] || 0) + 1;
-      }
+      user.cartData[foodItem._id] =
+        (user.cartData[foodItem._id] || 0) + aiData.quantity;
 
       await user.save();
 
       return res.json({
-        reply: `✅ Added ${aiData.quantity} ${foodItem.name} to your cart`,
+        reply: ` Added ${aiData.quantity} ${foodItem.name} to your cart`
       });
     }
 
-    // 💬 Normal chat
     return res.json({ reply: aiData.reply });
 
   } catch (error) {
     console.error("AI Error:", error);
+
+    if (error.status === 429) {
+      return res.status(429).json({
+        reply: "⚠️ AI is busy. Please try again later."
+      });
+    }
+
     res.status(500).json({ reply: "AI failed" });
   }
 };
 
-// 🛒 MANUAL CART APIs (unchanged but cleaned)
-
+/* =======================
+   CART CONTROLLERS
+======================= */
 export const addToCart = async (req, res) => {
   try {
-    const user = await userModel.findById(req.body.userId);
+    const user = await userModel.findById(req.userId);
     if (!user.cartData) user.cartData = {};
 
     user.cartData[req.body.itemId] =
@@ -107,35 +114,34 @@ export const addToCart = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.json({ success: false, message: "Error Occurred" });
+    res.status(500).json({ success: false });
   }
 };
 
 export const removeFromCart = async (req, res) => {
   try {
-    const user = await userModel.findById(req.body.userId);
+    const user = await userModel.findById(req.userId);
+
     if (user.cartData?.[req.body.itemId] > 0) {
       user.cartData[req.body.itemId] -= 1;
     }
+
     await user.save();
     res.json({ success: true, message: "Removed From Cart" });
 
   } catch (error) {
     console.error(error);
-    res.json({ success: false, message: "Error" });
+    res.status(500).json({ success: false });
   }
 };
 
 export const getCart = async (req, res) => {
   try {
-    const user = await userModel.findById(req.body.userId);
-    if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
+    const user = await userModel.findById(req.userId);
     res.json({ success: true, cartData: user.cartData || {} });
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: "Error occurred" });
+    res.status(500).json({ success: false });
   }
 };
