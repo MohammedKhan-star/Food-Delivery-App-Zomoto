@@ -5,7 +5,7 @@ import { StoreContext } from "../../../context/StoreContext";
 
 const ChatBot = () => {
   const { url, token } = useContext(StoreContext);
-
+  const [open, setOpen] = useState(true);
   const [messages, setMessages] = useState([
     {
       role: "assistant",
@@ -109,8 +109,8 @@ const ChatBot = () => {
   };
 
   return (
-    <div className="chat-container">
-      <div className="chat-header">🍕 AI Food Assistant</div>
+    <div className={`chat-container ${open ? "open" : "closed"}`}>
+      <div className="chat-header" onClick={() => setOpen(!open)}>SmartMenu AI Chat Window</div>
 
       <div className="chat-body">
         {messages.map((msg, i) => (
@@ -128,11 +128,22 @@ const ChatBot = () => {
                 className="suggestion-card"
                 onClick={() => handleProductClick(item)}
               >
-                🍽️ {item.name} <span>₹{item.price}</span>
+              <img
+              src={`${url}/images/${item.image}`}
+              alt={item.name}
+              className="food-img"
+            />
+
+            <div className="food-info">
+              <h4>{item.name}</h4>
+              <p>₹{item.price}</p>
+            </div>
               </div>
             ))}
           </div>
         )}
+        
+
 
         {loading && <div className="chat-msg assistant">Typing...</div>}
         <div ref={chatEndRef} />

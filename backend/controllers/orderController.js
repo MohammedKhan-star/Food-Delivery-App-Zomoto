@@ -111,6 +111,32 @@ const updateStatus = async (req, res) => {
         res.json({ success: false, message: "Error updating order status" });
     }   
 }
+const trackOrderInChat = async (orderId) => {
+  try {
+    const res = await axios.get(`${url}/api/order/track/${orderId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (res.data.success) {
+      const { status, items, amount, estimatedDelivery } = res.data;
+
+      const itemList = items.map(i => `${i.name} x${i.quantity}`).join("\n");
+
+      setMessages(prev => [
+        ...prev,
+        {
+          role: "assistant",
+          text: `📦 **Order #${orderId}**\n\nItems:\n${itemList}\n\nTotal: ₹${amount}\nStatus: ${status}\nEstimated Delivery: ${estimatedDelivery}`
+        }
+      ]);
+    }
+  } catch (err) {
+    setMessages(prev => [
+      ...prev,
+      { role: "assistant", text: "❌ Unable to fetch order status. Check your Order ID." }
+    ]);
+  }
+};
 
 
-export {placeOrder,userOrders,verifyOrder,listOrders,updateStatus};
+export {placeOrder,userOrders,verifyOrder,listOrders,updateStatus,trackOrderInChat};
