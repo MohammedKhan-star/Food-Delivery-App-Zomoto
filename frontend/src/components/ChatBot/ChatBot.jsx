@@ -151,9 +151,10 @@ const ChatBot = () => {
 
       {/* 📞 WhatsApp */}
       <div className="call-support">
-        <a href="https://wa.me/919542355897" target="_blank">
-          WhatsApp: 9542355897
-        </a>
+        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=mohammedkhan20019@gmail.com" target="_blank">
+            Email: mohammedkhan20019@gmail.com
+          </a>
+
       </div>
 
       <div className="chat-input">
