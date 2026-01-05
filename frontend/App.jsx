@@ -8,7 +8,6 @@ import LoginPopup from './src/components/LoginPopup/LoginPopup'
 import Cart from './src/pages/Cart/Cart'
 import Verify from './src/pages/Verify/Verify';
 import MyOrders from './src/pages/MyOrders/MyOrders';
-import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
 
 
 const App = () => {

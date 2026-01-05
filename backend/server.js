@@ -20,7 +20,7 @@ connectDB(process.env.MONGO_URI);
 
 // Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
+console.log("Stripe initialized", stripe !== undefined);
 // Middleware
 app.use(express.json());
 app.use(cors());

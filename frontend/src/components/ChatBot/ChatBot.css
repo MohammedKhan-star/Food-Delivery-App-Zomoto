@@ -162,3 +162,14 @@
     padding: 0 14px;
   }
 }
+.call-support {
+  text-align: center;
+  padding: 6px;
+  background: #f7f7f7;
+  font-weight: bold;
+}
+
+.call-support a {
+  color: #e63946;
+  text-decoration: none;
+}

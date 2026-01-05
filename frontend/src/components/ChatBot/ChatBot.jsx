@@ -1,41 +1,56 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import "./ChatBot.css";
 import { StoreContext } from "../../../context/StoreContext";
 
 const ChatBot = () => {
-  const { food_list, url, token } = useContext(StoreContext);
+  const { url, token } = useContext(StoreContext);
 
   const [messages, setMessages] = useState([
-    { role: "assistant", text: "👋 Hi! Try saying: Add 2 burgers 🍔" }
+    {
+      role: "assistant",
+      text: "👋 Hi! Start typing to see food suggestions."
+    }
   ]);
+
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
 
-  // 🔍 Auto suggestions while typing
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    setInput(value);
+  const chatEndRef = useRef(null);
 
-    if (!value.trim()) {
+  /* 🔽 Auto scroll */
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, suggestions]);
+
+  /* 🔥 LIVE SUGGESTIONS */
+  const handleTyping = async (text) => {
+    setInput(text);
+
+    if (!text.trim()) {
       setSuggestions([]);
       return;
     }
 
-    const filtered = food_list.filter(item =>
-      item.name.toLowerCase().includes(value.toLowerCase())
-    );
+    try {
+      const res = await axios.post(
+        `${url}/api/cart/chat`,
+        { mode: "suggest", message: text },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-    setSuggestions(filtered.slice(0, 5));
+      setSuggestions(res.data.items || []);
+    } catch {
+      setSuggestions([]);
+    }
   };
 
-  // 🤖 Send message to AI
-  const sendMessage = async (customMessage) => {
-    const msg = customMessage || input;
-    if (!msg.trim()) return;
+  /* 📨 SEND MESSAGE */
+  const sendMessage = async () => {
+    if (!input.trim()) return;
 
-    setMessages(prev => [...prev, { role: "user", text: msg }]);
+    setMessages((prev) => [...prev, { role: "user", text: input }]);
     setInput("");
     setSuggestions([]);
     setLoading(true);
@@ -43,71 +58,59 @@ const ChatBot = () => {
     try {
       const res = await axios.post(
         `${url}/api/cart/chat`,
-        { message: msg }, // ✅ FIXED
-        {
-          headers: {
-            Authorization: `Bearer ${token}` // ✅ FIXED
-          }
-        }
+        { message: input },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const reply =
-        res.data.reply ||
-        res.data.message ||
-        "✅ Done! Your cart has been updated.";
-
-      setMessages(prev => [
+      setMessages((prev) => [
         ...prev,
-        { role: "assistant", text: reply }
+        { role: "assistant", text: res.data.reply }
       ]);
-
-    } catch (err) {
-      let errorMessage = "⚠️ Something went wrong. Try again.";
-
-      if (err.response) {
-        if (err.response.status === 401) {
-          errorMessage = "⚠️ Please login again to use AI ordering.";
-        } 
-        else if (err.response.status === 429) {
-          errorMessage = "⚠️ AI limit reached. Please try again later.";
-        } 
-        else if (err.response.data?.reply) {
-          errorMessage = err.response.data.reply;
-        }
-      }
-
-      setMessages(prev => [
+    } catch {
+      setMessages((prev) => [
         ...prev,
-        { role: "assistant", text: errorMessage }
+        { role: "assistant", text: "⚠️ Something went wrong. Try again." }
       ]);
     } finally {
       setLoading(false);
     }
   };
 
-  // 🎤 Voice Input
-  const startVoiceInput = () => {
-    if (!("webkitSpeechRecognition" in window)) {
-      alert("Voice input not supported");
-      return;
+  /* 🧾 PRODUCT CLICK */
+  const handleProductClick = async (item) => {
+    setSuggestions([]);
+    setMessages((prev) => [
+      ...prev,
+      { role: "user", text: item.name }
+    ]);
+
+    try {
+      const res = await axios.post(
+        `${url}/api/cart/chat`,
+        { mode: "detail", productId: item._id },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const p = res.data.product;
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          text: ` ${p.name}\n ₹${p.price}\n Category: ${p.category}`
+        }
+      ]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", text: "⚠️ Unable to load item." }
+      ]);
     }
-
-    const recognition = new window.webkitSpeechRecognition();
-    recognition.lang = "en-US";
-    recognition.start();
-
-    recognition.onresult = (event) => {
-      const voiceText = event.results[0][0].transcript;
-      sendMessage(voiceText);
-    };
   };
 
   return (
     <div className="chat-container">
-      <div className="chat-header">
-        🍕 AI Food Assistant
-        <button className="mic-btn" onClick={startVoiceInput}>🎤</button>
-      </div>
+      <div className="chat-header">🍕 AI Food Assistant</div>
 
       <div className="chat-body">
         {messages.map((msg, i) => (
@@ -115,32 +118,41 @@ const ChatBot = () => {
             {msg.text}
           </div>
         ))}
+
+        {/* 🔥 Animated Suggestions */}
+        {suggestions.length > 0 && (
+          <div className="suggestion-box">
+            {suggestions.map((item) => (
+              <div
+                key={item._id}
+                className="suggestion-card"
+                onClick={() => handleProductClick(item)}
+              >
+                🍽️ {item.name} <span>₹{item.price}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
         {loading && <div className="chat-msg assistant">Typing...</div>}
+        <div ref={chatEndRef} />
       </div>
 
-      {/* 🔍 Suggestions */}
-      {suggestions.length > 0 && (
-        <div className="suggestions">
-          {suggestions.map(item => (
-            <div
-              key={item._id}
-              className="suggestion-item"
-              onClick={() => sendMessage(`Add 1 ${item.name}`)}
-            >
-              {item.name} – ₹{item.price}
-            </div>
-          ))}
-        </div>
-      )}
+      {/* 📞 WhatsApp */}
+      <div className="call-support">
+        <a href="https://wa.me/919542355897" target="_blank">
+          WhatsApp: 9542355897
+        </a>
+      </div>
 
       <div className="chat-input">
         <input
           value={input}
-          onChange={handleInputChange}
-          placeholder="Type or say: Add 2 pizzas"
+          onChange={(e) => handleTyping(e.target.value)}
+          placeholder="Search food..."
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
         />
-        <button onClick={() => sendMessage()}>Send</button>
+        <button onClick={sendMessage}>Send</button>
       </div>
     </div>
   );
